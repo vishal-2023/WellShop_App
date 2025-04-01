@@ -1,31 +1,55 @@
 import React, { useEffect } from 'react';
 import { Animated, StyleSheet, View } from 'react-native';
+import { RootStackParams } from '../navigator/RootNavigation';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useNavigation } from '@react-navigation/native';
+import asyncStorage from '@react-native-async-storage/async-storage';
+
+
+type SplashScreenNavigationProp = NativeStackNavigationProp<RootStackParams,'Splash'>
+
+
 
 export default function Splash() {
-  // Create animated values for opacity and scale
-  const fadeAnim = new Animated.Value(0); // Initial opacity of 0 (invisible)
+  const fadeAnim = new Animated.Value(0); 
   const scaleAnim = new Animated.Value(0.5); 
 
-  useEffect(() => {
+  const navigation = useNavigation<SplashScreenNavigationProp>()
 
+  useEffect(() => {
     Animated.parallel([
       Animated.timing(fadeAnim, {
-        toValue: 1, // Target opacity
-        duration: 2000, // Duration of 2 seconds
-        useNativeDriver: true, // Use native driver for performance
+        toValue: 1, 
+        duration: 2000, 
+        useNativeDriver: true, 
       }),
       Animated.timing(scaleAnim, {
-        toValue: 1, // Target scale (normal size)
+        toValue: 1, 
         duration: 2000, 
-        useNativeDriver: true, // Use native driver for performance
+        useNativeDriver: true, 
       }),
     ]).start();
   }, []);
 
+  async function redirectScreen() {
+    const getToken = await asyncStorage.getItem('token');
+    if(getToken){
+      navigation.navigate('Tab');
+    }else{
+      navigation.navigate('Login')
+    }
+  }
+
+  useEffect(() => {
+    setTimeout(() => {
+      redirectScreen()
+    },2000)
+  },[])
+
   return (
     <View style={styles.container}>
       <Animated.Image
-        source={require('../assests/shop.jpg')}
+        source={require('../assests/shop.png')}
         style={[
           styles.image,
           {

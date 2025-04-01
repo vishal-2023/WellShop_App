@@ -7,8 +7,14 @@ const { withNativeWind } = require("nativewind/metro");
  *
  * @type {import('@react-native/metro-config').MetroConfig}
  */
+const {
+  wrapWithReanimatedMetroConfig,
+} = require('react-native-reanimated/metro-config');
+
 const config = mergeConfig(getDefaultConfig(__dirname), {
-    /* your config */
-  });
-  
-  module.exports = withNativeWind(config, { input: "./global.css" });
+  /* your custom config */
+});
+
+// Apply NativeWind and Reanimated configs
+const finalConfig = withNativeWind(config, { input: "./global.css" });
+module.exports = wrapWithReanimatedMetroConfig(finalConfig);
