@@ -4,12 +4,13 @@ import { RootStackParams } from '../navigator/RootNavigation'
 import { useNavigation } from '@react-navigation/native'
 
 type ProductScreenNavigationProp = NativeStackNavigationProp<RootStackParams, 'Product'>
-// const navigation = useNavigation<ProductScreenNavigationProp>();
 
-import { View, Text, ScrollView, Button, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 const ViewProductScreen = () => {
+const navigation = useNavigation<ProductScreenNavigationProp>();
+
     return (
         <View style={styles.container} className=''>
             {/* Scrollable content */}
@@ -36,7 +37,7 @@ const ViewProductScreen = () => {
 
             {/* Fixed Add to Cart button */}
             <View style={styles.addToCartContainer}>
-                <TouchableOpacity className='rounded-md p-4 bg-[#f8dcb9]'>
+                <TouchableOpacity className='rounded-md p-4 bg-[#f0cda2]' onPress={() => navigation.navigate('Cart') }>
                     <View className='flex-row items-center justify-center'>
                         <Icon name="cart-outline" size={24} color="black" />
                         <Text className='ml-2 text-center font-semibold'>Add to Cart</Text>
