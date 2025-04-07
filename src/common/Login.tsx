@@ -1,22 +1,86 @@
-import { View, Text, TextInput, TouchableOpacity, Platform, Keyboard } from 'react-native'
+import { View, Text, TextInput, TouchableOpacity, Platform, Keyboard, ToastAndroid, ActivityIndicator } from 'react-native'
 import React, { useState } from 'react'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { RootStackParams } from '../navigator/RootNavigation'
 import { useNavigation } from '@react-navigation/native'
 import { KeyboardAvoidingView } from 'react-native'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 type LoginScreenNavigationProp = NativeStackNavigationProp<RootStackParams, 'Login'>
+const baseUrl = 'https://e-cart-backend-anf6.onrender.com'
 
 const Login = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-
+  const [loading,setLoading] = useState(false);
   const navigation = useNavigation<LoginScreenNavigationProp>()
 
-  function handleLogin() {
-    setTimeout(() => {
+  async function handleLogin() {
+    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/
+    if (!email || !password) {
+      ToastAndroid.showWithGravity(
+        'Please Fill all required information',
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER,
+      )
+      return
+    }
+
+    if (!emailRegex.test(email)) {
+      ToastAndroid.showWithGravity(
+        'Incorrect Email format',
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER,
+      )
+      return
+    }
+    setLoading(true)
+
+
+    try {
+      const result = await fetch(`${baseUrl}/api/v1/user/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email, password
+        })
+      })
+
+      if (!result?.ok) {
+        const err = await result.json();
+        throw new Error(err?.message ?? "Failed to login")
+      }
+
+      const data = await result?.json();
+      // console.log("dddettaill",data);
+      await AsyncStorage.setItem('token',data?.token)
+
+      ToastAndroid.showWithGravity(
+        data?.message,
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER,
+      )
+
       navigation.navigate('Tab')
-    }, 2000)
+      setEmail('')
+      setPassword('')
+
+    } catch (err) {
+      ToastAndroid.showWithGravity(
+        `${err}`,
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER,
+      )
+    } finally {
+      setLoading(false)
+
+    }
+
+    // setTimeout(() => {
+    //   navigation.navigate('Tab')
+    // }, 2000)
   }
 
   return (
@@ -48,12 +112,12 @@ const Login = () => {
             onSubmitEditing={() => Keyboard.dismiss()}
           />
 
-          <TouchableOpacity 
-            className='w-full m-3 rounded-md' 
+          <TouchableOpacity
+            className='w-full m-3 rounded-md'
             onPress={handleLogin}
           >
             <Text className='text-center p-2 rounded-md text-white font-semibold text-xl bg-blue-500'>
-              Login
+              {loading ? <ActivityIndicator color="white" /> : 'Login'}
             </Text>
           </TouchableOpacity>
 

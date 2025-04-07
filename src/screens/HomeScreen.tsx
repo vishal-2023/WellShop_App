@@ -1,31 +1,42 @@
-import { Dimensions, FlatList, Image, KeyboardAvoidingView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
-import React, { useState } from 'react'
+import { ActivityIndicator, Dimensions, FlatList, Image, KeyboardAvoidingView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import React, { useEffect, useState } from 'react'
 import Carousel from 'react-native-reanimated-carousel';
 import Product from '../components/Product';
 import List from '../components/List';
-
-
-// const { width, height } = Dimensions.get('window');
-
-
+import { useDispatch, useSelector } from 'react-redux';
+import { getAllProducts } from '../reduxToolkit/HomeSlice';
+import { AppDispatch, RootState } from '../reduxToolkit/store';
 
 
 export default function HomeScreen() {
   const { width: screenWidth } = Dimensions.get('window');
-
+  const dispatch = useDispatch<AppDispatch>();
+  const [selectedFilter, setSelectedFilter] = useState('')
+  
 
   const images = [
     require('../assests/bg-1.jpg'),
     require('../assests/bg-2.jpg'),
     require('../assests/happy-beautiful-couple-posing-with-shopping-bags-violet.jpg')
-
-    // Add more image URLs as needed
   ];
 
+  const getAllProductData = useSelector((state : RootState) => state?.products)
+
+  useEffect(() => {
+    dispatch(getAllProducts(selectedFilter))
+  },[selectedFilter])
+
+  console.log("first",getAllProductData)
+
+  function handleFilter(filter:string){
+    setSelectedFilter(filter)
+  }
+
+  console.log("filtt",selectedFilter)
   return (
 
     <KeyboardAvoidingView
-      style={{ backgroundColor: '#fff7ed' }} behavior="padding"  >
+      style={{ backgroundColor: '#fff7ed' }} behavior="padding"  className=' h-full ' >
       <FlatList
         data={[1]}
         ListHeaderComponent={
@@ -49,8 +60,14 @@ export default function HomeScreen() {
                 )}
               />
             </View>
-            <List />
-            <Product />
+            <List filter={selectedFilter} setSelectedFilter={setSelectedFilter} /> 
+            {
+              getAllProductData?.status ? (
+                <Product data={getAllProductData} />
+              ) : (
+                <ActivityIndicator color="black" />
+              ) 
+            }
           </>
         }
         renderItem={() => <></>}

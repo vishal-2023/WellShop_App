@@ -1,16 +1,26 @@
-import { Image, StyleSheet, Text, TextInput, View } from 'react-native'
+import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import React from 'react'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import HomeScreen from '../screens/HomeScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import OrderScreen from '../screens/OrderScreen';
 import Icon from 'react-native-vector-icons/Ionicons'; // Import the icon library
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParams } from '../navigator/RootNavigation';
+import { useNavigation } from '@react-navigation/native';
+import { useSelector } from 'react-redux';
+import { RootState } from '../reduxToolkit/store';
 
 
 const Tab = createBottomTabNavigator();
 
-export default function Tabs() {
+type TabScreenNavigationProp = NativeStackNavigationProp<RootStackParams, 'Tab'>
 
+export default function Tabs() {
+  const navigation = useNavigation<TabScreenNavigationProp>()
+  const cartData: any = useSelector((state: RootState) => state?.cart?.AllCartItem)
+
+  let itemCount = cartData?.cart?.items?.length??0
   return (
     <Tab.Navigator>
       <Tab.Screen
@@ -36,16 +46,41 @@ export default function Tabs() {
                 </View>
                 <View className="flex flex-row pr-4 gap-3">
                   <Icon size={25} name="heart-outline" />
-                  <Icon size={25} name="cart-outline" />
+                  <TouchableOpacity onPress={() => navigation.navigate('Cart')}>
+                    <View style={{ position: 'relative' }}>
+                      <Icon name="cart-outline" size={24} color="black" />
+
+                      {/* Cart Badge */}
+                      {itemCount > 0 && (
+                        <View
+                          style={{
+                            position: 'absolute',
+                            top: -5,
+                            right: -5,
+                            backgroundColor: '#ba8304',
+                            borderRadius: 10,
+                            width: 16,
+                            height: 16,
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                          }}
+                        >
+                          <Text style={{ color: 'white', fontSize: 10, fontWeight: 'bold' }}>
+                            {itemCount}
+                          </Text>
+                        </View>
+                      )}
+                    </View>
+                  </TouchableOpacity>
                 </View>
               </View>
               <View className=' w-11/12 mx-auto  '>
-              <View className="border-[#dedbd7] bg-[#f2f1f0] rounded-xl flex flex-row items-center px-3 gap-3">
-                <Icon size={20} color="grey" name="search-outline" />
-                <TextInput className="w-9/12" placeholder="Search for keyword or product" />
-                <View className="w-0.5 h-8 bg-[#dedbd7] mx-2" />
-                <Icon size={20} className="pr-2" color="grey" name="filter-outline" />
-              </View>
+                <View className="border-[#dedbd7] bg-[#f2f1f0] rounded-xl flex flex-row items-center px-3 gap-3">
+                  <Icon size={20} color="grey" name="search-outline" />
+                  <TextInput className="w-9/12" placeholder="Search for keyword or product" />
+                  <View className="w-0.5 h-8 bg-[#dedbd7] mx-2" />
+                  <Icon size={20} className="pr-2" color="grey" name="filter-outline" />
+                </View>
               </View>
             </View>
 
@@ -65,7 +100,7 @@ export default function Tabs() {
           ),
         }}
       />
-      
+
       <Tab.Screen
         name="Help"
         component={ProfileScreen}

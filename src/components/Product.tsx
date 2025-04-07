@@ -4,78 +4,64 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParams } from '../navigator/RootNavigation';
 
-// Sample product data
-const products = [
-  {
-    id: '1',
-    title: 'Product 1',
-    price: '29.99',
-    image: 'https://via.placeholder.com/150',
-  },
-  {
-    id: '2',
-    title: 'Product 2',
-    price: '49.99',
-    image: 'https://via.placeholder.com/150',
-  },
-  {
-    id: '3',
-    title: 'Product 3',
-    price: '19.99',
-    image: 'https://via.placeholder.com/150',
-  },
-  {
-    id: '4',
-    title: 'Product 4',
-    price: '99.99',
-    image: 'https://via.placeholder.com/150',
-  },
-  // Add more products as needed
-];
 
 type ProductScreenNavigationProp = NativeStackNavigationProp<RootStackParams, 'Tab'>
 
-const HomePage = () => {
+const HomePage = ({ data }: any) => {
+  // console.log("ddlj", data)
   const navigation = useNavigation<ProductScreenNavigationProp>();
 
-  const renderProductItem = ({ item }: any) => (
-    <TouchableHighlight
-      underlayColor="#ffff"
-      activeOpacity={0.7}
-      className=' mt-3'
-      style={styles.productCard}
-      onPress={() => navigation.navigate('Product', { id: item?.id })}>
-      <View className='w-full' >
-        <Image className=' w-full h-full object-cover' source={require('../assests/shop.png')} style={styles.productImage} />
-        <Text style={styles.productTitle}>{item.title}</Text>
-        <Text style={styles.productPrice}>${item.price}</Text>
-      </View>
-    </TouchableHighlight>
+  const renderProductItem = ({ item }: any) => {
+    const img = item?.photos[0]?.url
+    return (
+      <TouchableHighlight
+        underlayColor="#ffff"
+        activeOpacity={0.7}
+        className=' mt-3'
+        style={styles.productCard}
+        onPress={() => navigation.navigate('Product', { id: item?._id })}>
+        <View className='w-full' >
+          <Image className=' w-full h-full object-cover'
+            source={{ uri: img }}
+            style={styles.productImage} />
+          <Text style={styles.productTitle}>{item.name}</Text>
+          <Text style={styles.productPrice}>${item.price}</Text>
+        </View>
+      </TouchableHighlight>
+    )
+  }
 
-  );
 
   return (
-    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      >
-        <View className="my-4 w-11/12 mx-auto">
-          <FlatList
-            data={products}
-            renderItem={renderProductItem}
-            keyExtractor={(item) => item.id}
-            numColumns={2}
-            contentContainerStyle={styles.productList}
-            columnWrapperStyle={styles.columnWrapper}
-            showsHorizontalScrollIndicator={false}
-            showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps="handled" // Ensures taps outside of the input field don't interfere
-          />
-        </View>
-      </KeyboardAvoidingView>
-    </TouchableWithoutFeedback>
-
+    <>
+      {
+        data?.products?.products?.length > 0 ? (
+          <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+            <KeyboardAvoidingView
+            className='mb-10'
+              style={{ flex: 1 }}
+              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            >
+              <View className="my-4 w-11/12 mx-auto">
+                <FlatList
+                  data={data?.products?.products ?? []}
+                  renderItem={renderProductItem}
+                  keyExtractor={(item) => item.id}
+                  numColumns={2}
+                  contentContainerStyle={styles.productList}
+                  columnWrapperStyle={styles.columnWrapper}
+                  showsHorizontalScrollIndicator={false}
+                  showsVerticalScrollIndicator={false}
+                  keyboardShouldPersistTaps="handled"
+                />
+              </View>
+            </KeyboardAvoidingView>
+          </TouchableWithoutFeedback>
+        ) : (
+          <Text className='text-center my-10'>No data found</Text>
+        )
+      }
+    </>
   );
 };
 

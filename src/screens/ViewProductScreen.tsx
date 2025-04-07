@@ -1,15 +1,95 @@
-import React from 'react'
-import { NativeStackNavigationProp } from '@react-navigation/native-stack'
-import { RootStackParams } from '../navigator/RootNavigation'
-import { useNavigation } from '@react-navigation/native'
+import React, { useEffect } from 'react'
 
-type ProductScreenNavigationProp = NativeStackNavigationProp<RootStackParams, 'Product'>
+import { RouteProp,  useRoute } from '@react-navigation/native'
 
-import { View, Text, ScrollView, StyleSheet, Image, TouchableOpacity } from 'react-native';
+// type ProductScreenNavigationProp = NativeStackNavigationProp<RootStackParams, 'Product'>
+
+import { View, Text, ScrollView, StyleSheet, Image, TouchableOpacity, ToastAndroid } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { useDispatch, useSelector } from 'react-redux'
+import { getSingleProduct } from '../reduxToolkit/HomeSlice'
+import { AppDispatch, RootState } from '../reduxToolkit/store'
+import { AddCartItem, GetAllCartItem } from '../reduxToolkit/CartSlice'
+import { baseUrl } from '../reduxToolkit/ProductService'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import axios from 'axios'
+
+type ProductScreenParams = {
+    id: string;
+};
+
+type ProductScreenRouteProp = RouteProp<{ Product: ProductScreenParams }, 'Product'>;
+
 
 const ViewProductScreen = () => {
-const navigation = useNavigation<ProductScreenNavigationProp>();
+    const dispatch = useDispatch<AppDispatch>();
+    // const navigation = useNavigation<ProductScreenNavigationProp>();
+
+    const productData: any = useSelector((state: RootState) => state?.products?.viewProduct)
+    const cartData: any = useSelector((state: RootState) => state?.cart?.AllCartItem)
+    const route = useRoute<ProductScreenRouteProp>();
+    const { id } = route?.params
+
+    // console.log("dettaaill", productData);
+    // console.log("carrrr", cartData);
+    useEffect(() => {
+        dispatch(getSingleProduct(id))
+        dispatch(GetAllCartItem())
+    }, [])
+
+    // console.log("aaaaaaaaa",id);
+    const IsCartItemAvailable = cartData?.cart?.items?.find((item: any) => item?.product?._id === id);
+
+    async function handleCartItem(id: string) {
+        const data = {
+            productId: id,
+            quantity: 1
+        }
+        dispatch(AddCartItem(data)).then((res) => {
+            console.log("rms", res)
+            if (res?.payload?.status) {
+                ToastAndroid.showWithGravity(
+                    'Items added to cart',
+                    ToastAndroid.SHORT,
+                    ToastAndroid.CENTER,
+                )
+                setTimeout(() => {
+                    dispatch(GetAllCartItem())
+                },1000)
+
+            }
+        }).catch((err) => {
+            // console.log("err",err)
+        })
+    }
+
+    async function handleRemoveCartItem(id: string) {
+        try {
+            console.log("tttt", id)
+            const token = await AsyncStorage.getItem('token')
+            console.log("ppp", token)
+            const response = await axios.delete(`${baseUrl}/api/v1/cart/delete-cart/${id}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+            console.log("ew", response.data)
+            if (response?.data?.status) {
+                ToastAndroid.showWithGravity(
+                    'Items removed sucessfully',
+                    ToastAndroid.SHORT,
+                    ToastAndroid.CENTER,
+                )
+                setTimeout(() => {
+                    dispatch(GetAllCartItem())
+                },1000)
+            }
+            return;
+        } catch (err) {
+            console.log("err", err)
+        }
+
+    }
 
     return (
         <View style={styles.container} className=''>
@@ -18,35 +98,46 @@ const navigation = useNavigation<ProductScreenNavigationProp>();
                 <View style={styles.productDetails} className=''>
                     {/* Product Image */}
                     <Image
-                        source={require('../assests/bg-2.jpg')}
+                        source={{ uri: productData?.product?.photos[0]?.url }}
                         style={styles.productImage}
                         resizeMode="contain"
                     />
 
 
                     {/* Product Name */}
-                    <Text style={styles.productTitle}>Product Name</Text>
-
+                    <Text style={styles.productTitle}>{productData?.product?.name}</Text>
+                    <Text style={styles.productPrice}> ₹{productData?.product?.price} </Text>
                     {/* Product Description */}
-                    <Text style={styles.productDescription}>This is a detailed description of the product...</Text>
+                    <Text style={styles.productDescription}> {productData?.product?.description} </Text>
 
                     {/* You can add more details like price, specifications, etc. */}
-                    <Text style={styles.productPrice}>$49.99</Text>
                 </View>
             </ScrollView>
 
             {/* Fixed Add to Cart button */}
             <View style={styles.addToCartContainer}>
-                <TouchableOpacity className='rounded-md p-4 bg-[#f0cda2]' onPress={() => navigation.navigate('Cart') }>
-                    <View className='flex-row items-center justify-center'>
-                        <Icon name="cart-outline" size={24} color="black" />
-                        <Text className='ml-2 text-center font-semibold'>Add to Cart</Text>
-                    </View>
-                </TouchableOpacity>
+                {
+                    IsCartItemAvailable?.product ? (
+                        <TouchableOpacity className='rounded-md p-4 bg-[#f0cda2]' onPress={() => handleRemoveCartItem(productData?.product?._id as string)}>
+                            <View className='flex-row items-center justify-center'>
+                                <Icon name="bag-remove-outline" size={24} color="black" />
+                                <Text className='ml-2 text-center font-semibold'>Remove from Cart</Text>
+                            </View>
+                        </TouchableOpacity>
+                    ) : (
+                        <TouchableOpacity className='rounded-md p-4 bg-[#f0cda2]' onPress={() => handleCartItem(productData?.product?._id as string)}>
+                            <View className='flex-row items-center justify-center'>
+                                <Icon name="cart-outline" size={24} color="black" />
+                                <Text className='ml-2 text-center font-semibold'>Add to Cart</Text>
+                            </View>
+                        </TouchableOpacity>
+                    )
+                }
+
 
             </View>
 
-        </View>
+        </View >
     );
 };
 
@@ -69,8 +160,8 @@ const styles = StyleSheet.create({
         marginBottom: 20,
     },
     productTitle: {
-        fontSize: 24,
-        fontWeight: 'bold',
+        fontSize: 20,
+        // fontWeight: 'bold',
     },
     productDescription: {
         marginTop: 10,

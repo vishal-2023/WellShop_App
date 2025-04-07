@@ -10,10 +10,9 @@ type SplashScreenNavigationProp = NativeStackNavigationProp<RootStackParams,'Spl
 
 
 
-export default function Splash() {
+export default  function Splash() {
   const fadeAnim = new Animated.Value(0); 
   const scaleAnim = new Animated.Value(0.5); 
-
   const navigation = useNavigation<SplashScreenNavigationProp>()
 
   useEffect(() => {
