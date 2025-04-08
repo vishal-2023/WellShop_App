@@ -1,8 +1,11 @@
 // AddressPage.js
 import React, { useState } from 'react';
-import { Text, TextInput, Button, StyleSheet, ScrollView, TouchableOpacity, View } from 'react-native';
+import { Text, TextInput, Button, StyleSheet, ScrollView, TouchableOpacity, View, ToastAndroid } from 'react-native';
 import { RootStackParams } from '../navigator/RootNavigation';
-import { RouteProp } from '@react-navigation/native';
+import { RouteProp, useNavigation } from '@react-navigation/native';
+import { useDispatch, useSelector } from 'react-redux';
+import { shippingAddress } from '../reduxToolkit/CartSlice';
+import { RootState } from '../reduxToolkit/store';
 
 type AddressScreenProps = {
   updateStep: (step: number) => void;
@@ -16,7 +19,10 @@ const AddressPage: React.FC<AddressScreenProps> = ({ updateStep }) => {
     zip: '',
     country: '',
   });
+  const dispatch = useDispatch();
 
+  const add = useSelector((state :RootState) => state?.cart.address)
+  console.log("addd",add);
   const handleInputChange = (name: any, value: any) => {
     setAddress((prevAddress) => ({
       ...prevAddress,
@@ -26,7 +32,15 @@ const AddressPage: React.FC<AddressScreenProps> = ({ updateStep }) => {
 
   const handleSubmit = () => {
     console.log('Address Submitted:', address);
-    // navigation.navigate('ProductSummary')
+    if(!address.city || !address.country || !address.state || !address.street || !address.zip){
+      return  ToastAndroid.showWithGravity(
+                'Please fill all required info.',
+                ToastAndroid.SHORT,
+                ToastAndroid.CENTER,
+              )
+    }
+    dispatch(shippingAddress(address))
+    updateStep(3)
     // You can process the form data here, e.g., save it to a database
   };
 
@@ -71,7 +85,7 @@ const AddressPage: React.FC<AddressScreenProps> = ({ updateStep }) => {
       <TouchableOpacity className=' p-3 w-48 bg-[#ebb434] rounded-md' onPress={() => { updateStep(1) }}>
           <Text className=' text-center font-bold text-white'>Back to Cart</Text>
         </TouchableOpacity>
-      <TouchableOpacity  className=' p-3 w-48 bg-[#ebb434] rounded-md'>
+      <TouchableOpacity onPress={handleSubmit}  className=' p-3 w-48 bg-[#ebb434] rounded-md'>
         <Text className=' text-white font-bold text-center'>Continue</Text>
       </TouchableOpacity>
         

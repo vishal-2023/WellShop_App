@@ -7,7 +7,8 @@ interface cartState {
     status: true | false,
     cartStatus: true |false,
     error: null | string
-    AllCartItem:[]
+    AllCartItem:[],
+    address:[]
 }
 
 const initialState: cartState = {
@@ -16,6 +17,7 @@ const initialState: cartState = {
     status: false,
     cartStatus:false,
     error: null,
+    address:[]
 };
 
 export const AddCartItem = createAsyncThunk('cart/add', async (data: any) => {
@@ -35,7 +37,11 @@ export const GetAllCartItem = createAsyncThunk('cart/get', async () => {
 const cartSlice = createSlice({
     name: 'cart',
     initialState,
-    reducers: {},
+    reducers: {
+        shippingAddress(state,action){
+            state.address = action.payload
+        }
+    },
     extraReducers: (builder) => {
         builder
             .addCase(AddCartItem.pending, (state) => {
@@ -64,5 +70,7 @@ const cartSlice = createSlice({
             })
     }
 })
+
+export const {shippingAddress} = cartSlice.actions
 
 export default cartSlice.reducer;

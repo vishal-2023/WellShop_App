@@ -4,12 +4,14 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import HomeScreen from '../screens/HomeScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import OrderScreen from '../screens/OrderScreen';
-import Icon from 'react-native-vector-icons/Ionicons'; // Import the icon library
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParams } from '../navigator/RootNavigation';
 import { useNavigation } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
 import { RootState } from '../reduxToolkit/store';
+import HelpSupportScreen from '../screens/HelpScreen';
+import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
+import Icon from 'react-native-vector-icons/Ionicons'; // Import the icon library
 
 
 const Tab = createBottomTabNavigator();
@@ -103,11 +105,34 @@ export default function Tabs() {
 
       <Tab.Screen
         name="Help"
-        component={ProfileScreen}
+        component={HelpSupportScreen}
         options={{
           tabBarIcon: ({ color, size }) => (
             <Icon name="help-circle-outline" size={size} color={color} />
           ),
+          headerShown: true,
+          header: () => {
+            return <View
+                        style={{
+                          width: '100%',
+                          height: 56,
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          gap:20,
+                          paddingHorizontal: 10,
+                          borderBottomWidth: 1,
+                          borderBottomColor: '#ccc',
+                          backgroundColor: '#fff7ed',
+                        }}
+                      >
+                        
+                        <View className='pl-4 flex flex-row justify-center items-center'>
+                          <MaterialIcon name="support-agent" size={25} color="black" />
+                          <Text>  Help & Support </Text>
+                        </View>
+          
+                      </View>
+          }
         }}
       />
       <Tab.Screen

@@ -26,7 +26,7 @@ export type RootStackParams = {
   },
   Cart: undefined,
   Address: undefined,
-  ProductSummary: undefined
+  Payment: undefined
 }
 
 export default function RootNavigation() {
@@ -53,7 +53,6 @@ export default function RootNavigation() {
       initialRouteName='Splash'
     >
       <Stack.Screen name="Tab" options={{ headerShown: false }} component={tabScreen} />
-
       <Stack.Screen name="Splash" options={{ headerShown: false }} component={Splash} />
       <Stack.Screen name="Login" options={{ headerShown: false }} component={Login} />
       <Stack.Screen name="Signup" options={{ headerShown: false }} component={Signup} />
@@ -118,7 +117,7 @@ export default function RootNavigation() {
         
       }} component={ViewProductScreen} />
 
-      <Stack.Screen name="ProductSummary" component={ProductSummaryScreen} />
+      <Stack.Screen name="Payment" component={ProductSummaryScreen} />
 
       <Stack.Screen
         name="Cart"
@@ -137,23 +136,6 @@ export default function RootNavigation() {
       >
         {(props) => <CartScreen {...props} currentStep={currentStep} updateStep={updateStep} />}
       </Stack.Screen>
-
-      {/* <Stack.Screen
-        name="Address"
-        options={{
-          headerShown: true,
-          headerStyle: {
-            backgroundColor: '#fff7ed'
-          },
-          // headerTitle: () => <StepProgress currentStep={currentStep} />,
-        }
-
-        }
-
-      >
-        {(props) => <AddressPage {...props} updateStep={updateStep} />}
-      </Stack.Screen> */}
-
 
     </Stack.Navigator>
   )

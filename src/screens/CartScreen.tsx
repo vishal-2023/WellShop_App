@@ -8,6 +8,7 @@ import { GetAllCartItem } from '../reduxToolkit/CartSlice';
 import { AppDispatch, RootState } from '../reduxToolkit/store';
 import AddressPage from './AddressScreen';
 import { getAllCartItem, removeCartItem, updateCartItem } from '../reduxToolkit/ProductService';
+import ProductSummaryScreen from './ProductSummary';
 
 type CartScreenProps = {
   currentStep: number,
@@ -157,6 +158,11 @@ const CartScreen: React.FC<CartScreenProps> = ({ currentStep, updateStep, route,
       {
         currentStep == 2 &&
         <AddressPage updateStep={updateStep} />
+      }
+
+      {
+        currentStep == 3 && 
+        <ProductSummaryScreen />
       }
     </>
 
